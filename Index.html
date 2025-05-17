@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Net Shop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fff;
+      --text: #222;
+      --primary: #222;
+      --nav: #444;
+      --accent: #007bff;
+    }
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #eee;
+      --primary: #1f1f1f;
+      --nav: #333;
+      --accent: #3399ff;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    header, footer {
+      background-color: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 1rem 1rem;
+    }
+    nav {
+      background-color: var(--nav);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav .nav-links {
+      display: flex;
+      gap: 1rem;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    nav a:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .toggle-theme {
+      cursor: pointer;
+      color: yellow;
+      font-weight: bold;
+      user-select: none;
+    }
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      gap: 5px;
+    }
+    .hamburger div {
+      width: 25px;
+      height: 3px;
+      background: white;
+      border-radius: 2px;
+    }
+
+    /* Responsive nav */
+    @media (max-width: 700px) {
+      nav .nav-links {
+        position: fixed;
+        top: 60px;
+        right: 0;
+        background: var(--nav);
+        flex-direction: column;
+        width: 200px;
+        height: calc(100% - 60px);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        padding: 1rem;
+        gap: 1.5rem;
+      }
+      nav .nav-links.open {
+        transform: translateX(0);
+      }
+      .hamburger {
+        display: flex;
+      }
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 2rem 1rem;
+    }
+
+    section {
+      display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    section.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Hero and products */
+    .hero {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .controls {
+      margin-bottom: 1rem;
+      text-align: right;
+    }
+
+    .controls label, .controls select {
+      font-size: 1rem;
+      margin-left: 0.5rem;
+    }
+
+    .products {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: center;
+    }
+    .product {
+      background: var(--bg);
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      width: 200px;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .product:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+    .product h3 {
+      margin-top: 0;
+    }
+    .product p {
+      font-weight: bold;
+      color: var(--accent);
+      margin: 0.5rem 0;
+    }
+    .product button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: var(--accent);
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .product button:hover {
+      background: #0056b3;
+    }
+
+    /* Forms */
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    input, textarea, select, button {
+      padding: 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    img#preview {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    /* Cart */
+    #cart-list {
+      max-width: 400px;
+      margin: 0 auto 1rem;
+    }
+    .cart-item {
+      background: var(--bg);
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 0.3s ease forwards;
+    }
+    .cart-item button {
+      background: #dc3545;
+      font-weight: bold;
+      padding: 0.2rem 0.6rem;
+      border-radius: 5px;
+    }
+    .cart-item button:hover {
+      background: #a71d2a;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    /* Popup */
+    .popup {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 9999;
+    }
+    .popup.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+  <header>
+    <h1>Net Shop</h1>
+    <p>Shop clothes, toys, and more!</p>
+  </header>
+
+  <nav>
+    <div class="hamburger" id="hamburger" aria-label="Toggle menu" tabindex="0">
+      <div></div><div></div><div></div>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <a onclick="showSection('home')">Home</a>
+      <a onclick="showSection('sell')">Sell</a>
+      <a onclick="showSection('preferences')">Preferences</a>
+      <a onclick="showSection('delivery')">Delivery</a>
+      <a onclick="showSection('cart')">Cart</a>
+      <a onclick="showSection('login')">Login</a>
+      <span class="toggle-theme" onclick="toggleTheme()" tabindex="0">Toggle Dark/Light</span>
+    </div>
+  </nav>
+
+  <main>
+    <section id="home" class="active">
+      <div class="hero">
+        <h2>Welcome to Net Shop</h2>
+        <p>Discover your favorite items today.</p>
+      </div>
+      <div class="controls">
+        <label for="filter">Filter by category:</label>
+        <select id="filter" onchange="filterProducts()">
+          <option value="all">All</option>
+          <option value="clothes">Clothes</option>
+          <option value="toys">Toys</option>
+        </select>
+        <label for="sort">Sort by:</label>
+        <select id="sort" onchange="sortProducts()">
+          <option value="default">Default</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="name-asc">Name: A-Z</option>
+          <option value="name-desc">Name: Z-A</option>
+        </select>
+      </div>
+      <div class="products" id="product-list">
+        <div class="product" data-category="clothes" data-price="9.99" data-name="Kids T-Shirt">
+          <h3>Kids T-Shirt</h3>
+          <p>$9.99</p>
+          <button onclick="addToCart('Kids T-Shirt', 9.99)">Add to Cart</button>
+        </div>
+        <div class="product" data-category="toys" data-price="14.99" data-name="Action Figure">
+          <h3>Action Figure</h3>
+          <p>$14.99</p>
+          <button onclick="addToCart('Action Figure', 14.99)">Add to Cart</button>
+        </div>
+        <div class="product" data-category="clothes" data-price="29.99" data-name="Jacket">
+          <h3>Jacket</h3>
+          <p>$29.99</p>
+          <button onclick="addToCart('Jacket', 29.99)">Add to Cart</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="sell">
+      <h2>Seller Dashboard</h2>
+      <form id="upload-form" onsubmit="submitProduct(event)">
+        <label for="product-name">Product Name</label>
+        <input id="product-name" type="text" required />
+        <label for="product-category">Category</label>
+        <select id="product-category" required>
+          <option value="">Select category</option>
+          <option value="clothes">Clothes</option>
+          <option value="toys">Toys</option>
+        </select>
+        <label for="product-price">Price ($)</label>
+        <input id="product-price" type="number" min="0" step="0.01" required />
+        <label for="product-image">Product Image</label>
+        <input id="product-image" type="file" accept="image/*" onchange="previewImage(event)" required />
+        <img id="preview" alt="Preview Image" style="display:none" />
+        <button type="submit">Upload Product</button>
+      </form>
+    </section>
+
+    <section id="preferences">
+      <h2>Preferences</h2>
+      <p>Set your shopping preferences here.</p>
+      <form id="preferences-form" onsubmit="savePreferences(event)">
+        <label for="currency">Currency</label>
+        <select id="currency" required>
+          <option value="USD">USD</option>
+          <option value="INR">INR</option>
+          <option value="EUR">EUR</option>
+        </select>
+        <label for="notifications">Email Notifications</label>
+        <select id="notifications" required>
+          <option value="enabled">Enabled</option>
+          <option value="disabled">Disabled</option>
+        </select>
+        <button type="submit">Save Preferences</button>
+      </form>
+    </section>
+
+    <section id="delivery">
+      <h2>Delivery Status</h2>
+      <p>Check your delivery status here.</p>
+      <form id="delivery-form" onsubmit="checkDelivery(event)">
+        <label for="order-id">Order ID</label>
+        <input id="order-id" type="text" required />
+        <button type="submit">Check</button>
+      </form>
+      <div id="delivery-result"></div>
+    </section>
+
+    <section id="cart">
+      <h2>Your Cart</h2>
+      <div id="cart-list"></div>
+      <p id="cart-total"></p>
+      <button onclick="clearCart()">Clear Cart</button>
+    </section>
+
+    <section id="login">
+      <h2>User Login</h2>
+      <form id="login-form" onsubmit="loginUser(event)">
+        <label for="email">Email</label>
+        <input id="email" type="email" required />
+        <label for="password">Password</label>
+        <input id="password" type="password" required />
+        <button type="submit">Login</button>
+      </form>
+      <p id="login-msg"></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Net Shop. All rights reserved.</p>
+  </footer>
+
+  <div class="popup" id="popup"></div>
+
+<script>
+  // Navigation toggle
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('nav-links');
+  hamburger.addEventListener('click', () => {
+    navLinks.classList.toggle('open');
+  });
+
+  // Show section
+  function showSection(id) {
+    document.querySelectorAll('main section').forEach(sec => {
+      sec.classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+    navLinks.classList.remove('open');
+  }
+
+  // Theme toggle
+  function toggleTheme() {
+    const current = document.body.getAttribute('data-theme');
+    document.body.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+  }
+
+  // Product filter
+  function filterProducts() {
+    const filter = document.getElementById('filter').value;
+    const products = document.querySelectorAll('.product');
+    products.forEach(p => {
+      const cat = p.getAttribute('data-category');
+      p.style.display = (filter === 'all' || filter === cat) ? 'block' : 'none';
+    });
+  }
+
+  // Product sort
+  function sortProducts() {
+    const sort = document.getElementById('sort').value;
+    const container = document.getElementById('product-list');
+    let products = Array.from(container.querySelectorAll('.product'));
+
+    products.sort((a,b) => {
+      const priceA = parseFloat(a.getAttribute('data-price'));
+      const priceB = parseFloat(b.getAttribute('data-price'));
+      const nameA = a.getAttribute('data-name').toLowerCase();
+      const nameB = b.getAttribute('data-name').toLowerCase();
+
+      switch(sort) {
+        case 'price-asc': return priceA - priceB;
+        case 'price-desc': return priceB - priceA;
+        case 'name-asc': return nameA.localeCompare(nameB);
+        case 'name-desc': return nameB.localeCompare(nameA);
+        default: return 0;
+      }
+    });
+
+    // Re-append in sorted order
+    products.forEach(p => container.appendChild(p));
+  }
+
+  // Cart
+  let cart = [];
+
+  function addToCart(name, price) {
+    const found = cart.find(item => item.name === name);
+    if(found) {
+      found.qty++;
+    } else {
+      cart.push({name, price, qty: 1});
+    }
+    updateCart();
+    showPopup(`${name} added to cart`);
+  }
+
+  function updateCart() {
+    const cartList = document.getElementById('cart-list');
+    cartList.innerHTML = '';
+    let total = 0;
+    cart.forEach(({name, price, qty}, i) => {
+      total += price * qty;
+      const div = document.createElement('div');
+      div.className = 'cart-item';
+      div.innerHTML = `
+        <span>${name} x${qty} - $${(price*qty).toFixed(2)}</span>
+        <button onclick="removeFromCart(${i})">&times;</button>
+      `;
+      cartList.appendChild(div);
+    });
+    document.getElementById('cart-total').textContent = `Total: $${total.toFixed(2)}`;
+  }
+
+  function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCart();
+  }
+
+  function clearCart() {
+    cart = [];
+    updateCart();
+  }
+
+  // Popup messages
+  function showPopup(message) {
+    const popup = document.getElementById('popup');
+    popup.textContent = message;
+    popup.classList.add('show');
+    setTimeout(() => {
+      popup.classList.remove('show');
+    }, 2000);
+  }
+
+  // Seller Dashboard - image preview
+  function previewImage(event) {
+    const file = event.target.files[0];
+    if(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = document.getElementById('preview');
+        img.src = reader.result;
+        img.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Seller Dashboard - product upload
+  function submitProduct(event) {
+    event.preventDefault();
+    const name = document.getElementById('product-name').value.trim();
+    const category = document.getElementById('product-category').value;
+    const price = parseFloat(document.getElementById('product-price').value);
+    const imageInput = document.getElementById('product-image');
+    if(!name || !category || isNaN(price) || !imageInput.files.length) {
+      alert('Please fill all fields correctly.');
+      return;
+    }
+    // Add product to product list
+    const productList = document.getElementById('product-list');
+    const div = document.createElement('div');
+    div.className = 'product';
+    div.setAttribute('data-category', category);
+    div.setAttribute('data-price', price);
+    div.setAttribute('data-name', name);
+    div.innerHTML = `
+      <h3>${name}</h3>
+      <p>$${price.toFixed(2)}</p>
+      <button onclick="addToCart('${name}', ${price})">Add to Cart</button>
+    `;
+    productList.appendChild(div);
+    // Reset form & preview
+    event.target.reset();
+    document.getElementById('preview').style.display = 'none';
+    showPopup('Product uploaded!');
+    showSection('products');
+  }
+
+  // Preferences form
+  function savePreferences(event) {
+    event.preventDefault();
+    const currency = document.getElementById('currency').value;
+    const notifications = document.getElementById('notifications').value;
+    // Save preferences (in this demo, just show popup)
+    showPopup(`Preferences saved: Currency=${currency}, Notifications=${notifications}`);
+  }
+
+  // Delivery Status check
+  function checkDelivery(event) {
+    event.preventDefault();
+    const orderId = document.getElementById('order-id').value.trim();
+    if(!orderId) {
+      alert('Please enter a valid Order ID.');
+      return;
+    }
+    // Demo delivery status (random)
+    const statuses = ['Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    document.getElementById('delivery-result').textContent = `Order ${orderId}: ${status}`;
+  }
+
+  // User Login (demo)
+  function loginUser(event) {
+    event.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    // Simple validation demo
+    if(email === 'user@example.com' && password === 'password123') {
+      document.getElementById('login-msg').textContent = 'Login successful!';
+      showPopup('Welcome back!');
+      // After login, you might want to redirect or show user info
+    } else {
+      document.getElementById('login-msg').textContent = 'Invalid credentials.';
+    }
+  }
+
+  // Initialize
+  showSection('products');
+  updateCart();
+</script>
+
+</body>
+  </html>
+  
